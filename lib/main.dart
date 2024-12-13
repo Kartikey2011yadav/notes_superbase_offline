@@ -1,4 +1,3 @@
-import 'package:brick_core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
