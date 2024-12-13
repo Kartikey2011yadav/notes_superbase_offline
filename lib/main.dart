@@ -37,38 +37,61 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Notes',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        textTheme: const TextTheme(
+          headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black),
+          bodyMedium: TextStyle(fontSize: 12.0, color: Colors.black54),
+        ),
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Flutter Demo Home Page'),
+          title: const Text('Flutter Notes'),
+          centerTitle: true,
+          backgroundColor: Colors.blueAccent,
         ),
-        body: StreamBuilder(
-          stream: notesStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-              return ListView.builder(
+        body: Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue, Colors.lightBlueAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: StreamBuilder<List<Note>>(
+            stream: notesStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                return ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
                     final note = snapshot.data![index];
-                    return ListTile(
-                      title: Text(note.content),
-                      subtitle: Text(note.createdAt),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async {
-                          await Repository().delete<Note>(note);
-                        },
+                    return Card(
+                      elevation: 5,
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: ListTile(
+                        title: Text(note.content, style: Theme.of(context).textTheme.headlineMedium),
+                        subtitle: Text(note.createdAt, style: Theme.of(context).textTheme.bodyMedium),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.redAccent),
+                          onPressed: () async {
+                            await Repository().delete<Note>(note);
+                          },
+                        ),
                       ),
                     );
-                  });
-              // return Text('${snapshot.data?.length} notes found');
-            } else {
-              return CircularProgressIndicator();
-            }
-          },
+                  },
+                );
+              } else {
+                return const Center(child: Text('No notes found', style: TextStyle(color: Colors.white, fontSize: 20)));
+              }
+            },
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
@@ -77,7 +100,8 @@ class _MyAppState extends State<MyApp> {
               createdAt: DateTime.now().toIso8601String(),
             ));
           },
-          tooltip: 'Add Notes',
+          tooltip: 'Add Note',
+          backgroundColor: Colors.blueAccent,
           child: const Icon(Icons.add),
         ),
       ),
